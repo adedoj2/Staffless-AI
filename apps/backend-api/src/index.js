@@ -5,6 +5,8 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
+const businessRoutes = require('./routes/businesses');
+const conversationRoutes = require('./routes/conversations');
 
 const app = express();
 app.use(cors());
@@ -12,6 +14,8 @@ app.use(bodyParser.json());
 
 app.use('/auth', authRoutes);
 app.use('/chat', chatRoutes);
+app.use('/businesses', businessRoutes);
+app.use('/conversations', conversationRoutes);
 
 app.get('/', (req, res) => res.send({ status: 'ok' }));
 

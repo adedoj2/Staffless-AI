@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "node src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "seed": "node scripts/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
