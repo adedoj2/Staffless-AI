@@ -10,6 +10,13 @@
   "dependencies": {
     "next": "^13.4.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "zustand": "^4.4.0",
+    "clsx": "^1.2.1"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.6",
+    "postcss": "^8.4.21",
+    "autoprefixer": "^10.4.14"
   }
 }
