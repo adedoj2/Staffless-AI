@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  businessId   String   @unique
+  business     Business @relation(fields: [businessId], references: [id])
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+model Business {
+  id          String   @id @default(uuid())
+  name        String
+  industry    String
+  email       String
+  phone       String
+  servicesJson Json
+  hoursJson    Json
+  faqsJson     Json
+  createdAt    DateTime @default(now())
+
+  user          User?
+  customers     Customer[]
+  conversations Conversation[]
+  leads         Lead[]
+  appointments  Appointment[]
+  invoices      Invoice[]
+  aiActions     AIAction[]
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  name       String?
+  email      String?
+  phone      String?
+  channel    String   @default("web")
+  createdAt  DateTime @default(now())
+
+  conversations Conversation[]
+  leads         Lead[]
+  appointments  Appointment[]
+  invoices      Invoice[]
+}
+
+model Conversation {
+  id         String   @id @default(uuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  channel    String   @default("web")
+  status     String   @default("open")
+  createdAt  DateTime @default(now())
+
+  messages  Message[]
+  aiActions AIAction[]
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         String       // customer | ai | owner
+  content        String
+  agentType      String?      // sales | operations | finance | marketing — set only if sender = ai
+  createdAt      DateTime     @default(now())
+}
+
+model Lead {
+  id            String   @id @default(uuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  score         Int      @default(0)
+  status        String   @default("new") // new | qualified | hot | converted | lost
+  serviceNeeded String?
+  budget        String?
+  timeline      String?
+  notes         String?
+  createdAt     DateTime @default(now())
+}
+
+model Appointment {
+  id         String   @id @default(uuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  service    String
+  datetime   DateTime
+  status     String   @default("pending") // pending | confirmed | completed | cancelled
+  createdAt  DateTime @default(now())
+
+  invoices Invoice[]
+}
+
+model Invoice {
+  id            String       @id @default(uuid())
+  businessId    String
+  business      Business     @relation(fields: [businessId], references: [id])
+  customerId    String
+  customer      Customer     @relation(fields: [customerId], references: [id])
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  amount        Float
+  itemsJson     Json
+  status        String       @default("draft") // draft | sent | paid | overdue
+  dueDate       DateTime?
+  createdAt     DateTime     @default(now())
+}
+
+model AIAction {
+  id             String        @id @default(uuid())
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id])
+  conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  agentType      String        // sales | operations | finance | marketing
+  action         String        // qualify_lead | score_lead | propose_appointment | answer_faq |
+                                // follow_up | appointment_reminder | update_lead_status |
+                                // create_invoice | send_reminder | generate_content
+  result         Json
+  createdAt      DateTime      @default(now())
+}

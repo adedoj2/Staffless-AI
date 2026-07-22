@@ -1,0 +1,9 @@
+{
+  "name": "ai-agents",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node src/index.js"
+  }
+}
