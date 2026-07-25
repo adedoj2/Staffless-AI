@@ -1,9 +1,14 @@
 import os
 import json
+from pathlib import Path
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from db import init_db, close_db, fetchrow, fetch, execute
 from ai_agent import run_agent_turn
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
 app = FastAPI(title="Staffless FastAPI")
 
@@ -26,7 +31,7 @@ async def health():
 
 @app.post("/chat/{business_id}/message")
 async def chat_message(business_id: str, payload: ChatReq):
-    if not payload.message:
+    if not payload.message or not payload.message.strip():
         raise HTTPException(status_code=400, detail="message required")
 
     b = await fetchrow("SELECT id, name FROM business WHERE id = $1", business_id)

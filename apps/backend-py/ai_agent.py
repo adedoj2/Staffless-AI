@@ -41,7 +41,9 @@ async def run_agent_turn(context: dict, message: str) -> dict:
         if GEMINI_API_KEY:
             prompt = (
                 "You are an assistant for a small business. Given the conversation context and latest customer message, "
-                "reply with a concise answer and, if relevant, output a JSON object on a single line with keys: "
+                "reply only when a customer has asked a question or provided a message. Do not initiate conversations, "
+                "send unsolicited greetings, or start the conversation on your own. Provide a concise answer and, if relevant, "
+                "output a JSON object on a single line with keys: "
                 "'intent' (one-word intent like booking_request, faq, pricing), "
                 "'reply' (plain reply text), "
                 "'leadUpdate' (object or null), "
