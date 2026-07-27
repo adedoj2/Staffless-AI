@@ -20,13 +20,13 @@ Many small businesses lose leads because inquiries arrive through multiple chann
 
 ## Architecture at a glance
 
-- Frontend web experience: apps/frontend-web
-- Internal dashboard: apps/frontend-dashboard
-- Python API backend: apps/backend-py
-- Shared AI logic and services: services/ai-agents
+- Frontend web experience: [apps/frontend-web](apps/frontend-web)
+- Internal dashboard: [apps/frontend-dashboard](apps/frontend-dashboard)
+- Python API backend: [apps/backend-py](apps/backend-py)
+- Shared AI logic and services: [services/ai-agents](services/ai-agents)
 - Data layer: Supabase Postgres with Prisma-based models
 
-The current backend direction is the FastAPI-based Python service in apps/backend-py. The older Node/Express backend remains in the repository for reference and migration purposes.
+The current backend direction is the FastAPI-based Python service in [apps/backend-py](apps/backend-py). The older Node/Express backend remains in the repository for reference and migration purposes.
 
 ## For judges and potential contributors
 
@@ -48,9 +48,19 @@ cd apps/backend-py
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+Set the required environment variables:
+
+```bash
 export DATABASE_URL="postgresql://..."
 export GEMINI_API_KEY="..."
-uvicorn main:app --reload --port 8080
+```
+
+Run the backend:
+
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8080
 ```
 
 ### 2. Frontends
@@ -69,16 +79,16 @@ export NEXT_PUBLIC_API_URL="http://localhost:8080"
 
 ## Project structure
 
-- apps/backend-py: FastAPI backend and AI integration entry points
-- apps/frontend-web: public-facing website experience
-- apps/frontend-dashboard: internal operations dashboard
-- services/ai-agents: reusable AI agent logic
-- docs/: setup, migration, and deployment notes
+- [apps/backend-py](apps/backend-py): FastAPI backend and AI integration entry points
+- [apps/frontend-web](apps/frontend-web): public-facing website experience
+- [apps/frontend-dashboard](apps/frontend-dashboard): internal operations dashboard
+- [services/ai-agents](services/ai-agents): reusable AI agent logic
+- [docs](docs): setup, migration, and deployment notes
 
 ## Notes for contributors
 
 - Keep secrets out of the repository. Use environment variables or a secret manager for API keys and database credentials.
-- The project documentation in docs/ is a good place to start for deployment and migration details.
+- The project documentation in [docs](docs) is a good place to start for deployment and migration details.
 - If you are exploring the repo, begin with the backend and the frontend entry points to understand the full flow from chat input to stored conversation.
 
 ## Recommended next steps
@@ -87,4 +97,18 @@ export NEXT_PUBLIC_API_URL="http://localhost:8080"
 - improve the dashboard experience for staff review and follow-up
 - add stronger testing and deployment automation
 - prepare a polished demo script for judges and investors
+
+## Documentation
+
+For implementation details, environment setup, and deployment guidance, see:
+
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
+- [docs/MIGRATION_TO_FASTAPI.md](docs/MIGRATION_TO_FASTAPI.md)
+- [apps/backend-py/README.md](apps/backend-py/README.md)
+
+## Security notes
+
+- Store sensitive values such as API keys and database credentials in a secure secret store
+- Do not commit secrets or local environment files to source control
+- Use environment variables or secret management for production deployments
 
