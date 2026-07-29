@@ -56,15 +56,15 @@ async def chat_message(business_id: str, payload: ChatReq):
             customer_id = None
 
     if not customer_id:
-        rec = await fetchrow("INSERT INTO customer (businessId, name, channel, createdAt) VALUES ($1, $2, 'web', now()) RETURNING id", business_id, payload.customerName)
+        rec = await fetchrow('INSERT INTO customer ("businessId", name, channel, "createdAt") VALUES ($1, $2, \'web\', now()) RETURNING id', business_id, payload.customerName)
         customer_id = rec["id"]
 
-    conv = await fetchrow("SELECT id FROM conversation WHERE businessId=$1 AND customerId=$2 AND status='open' LIMIT 1", business_id, customer_id)
+    conv = await fetchrow('SELECT id FROM conversation WHERE "businessId"=$1 AND "customerId"=$2 AND status=\'open\' LIMIT 1', business_id, customer_id)
     if not conv:
-        conv = await fetchrow("INSERT INTO conversation (businessId, customerId, channel, status, createdAt) VALUES ($1,$2,'web','open',now()) RETURNING id", business_id, customer_id)
+        conv = await fetchrow('INSERT INTO conversation ("businessId", "customerId", channel, status, "createdAt") VALUES ($1,$2,\'web\',\'open\',now()) RETURNING id', business_id, customer_id)
     conversation_id = conv["id"]
 
-    await execute("INSERT INTO message (conversationId, sender, content, createdAt) VALUES ($1, 'customer', $2, now())", conversation_id, payload.message)
+    await execute('INSERT INTO message ("conversationId", sender, content, "createdAt") VALUES ($1, \'customer\', $2, now())', conversation_id, payload.message)
 
     context = {
         "business": {"id": b["id"], "name": b["name"]},
@@ -77,7 +77,7 @@ async def chat_message(business_id: str, payload: ChatReq):
     reply = None
     if agent_result and agent_result.get("replyText"):
         await execute(
-            "INSERT INTO message (conversationId, sender, content, agentType, createdAt) VALUES ($1, 'ai', $2, $3, now())",
+            'INSERT INTO message ("conversationId", sender, content, "agentType", "createdAt") VALUES ($1, \'ai\', $2, $3, now())',
             conversation_id,
             agent_result["replyText"],
             agent_result.get("agentType")
@@ -85,7 +85,7 @@ async def chat_message(business_id: str, payload: ChatReq):
         reply = agent_result["replyText"]
 
     if agent_result and agent_result.get("leadUpdate"):
-        existing = await fetchrow("SELECT id FROM lead WHERE businessId=$1 AND customerId=$2 LIMIT 1", business_id, customer_id)
+        existing = await fetchrow('SELECT id FROM lead WHERE "businessId"=$1 AND "customerId"=$2 LIMIT 1', business_id, customer_id)
         if existing:
             await execute(
                 "UPDATE lead SET status=$1, notes=$2, score=$3 WHERE id=$4",
@@ -96,7 +96,7 @@ async def chat_message(business_id: str, payload: ChatReq):
             )
         else:
             await execute(
-                "INSERT INTO lead (businessId, customerId, score, status, serviceNeeded, budget, timeline, notes, createdAt) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now())",
+                'INSERT INTO lead ("businessId", "customerId", score, status, "serviceNeeded", budget, timeline, notes, "createdAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now())',
                 business_id,
                 customer_id,
                 agent_result["leadUpdate"].get("score", 0),
@@ -113,14 +113,14 @@ async def chat_message(business_id: str, payload: ChatReq):
             params = act.get("params", {})
             if not params.get("datetime"):
                 await execute(
-                    "INSERT INTO appointment (businessId, customerId, service, datetime, status, createdAt) VALUES ($1,$2,$3,now(),'pending',now())",
+                    'INSERT INTO appointment ("businessId", "customerId", service, datetime, status, "createdAt") VALUES ($1,$2,$3,now(),\'pending\',now())',
                     business_id,
                     customer_id,
                     params.get("service", "service")
                 )
             else:
                 await execute(
-                    "INSERT INTO appointment (businessId, customerId, service, datetime, status, createdAt) VALUES ($1,$2,$3,$4,'pending',now())",
+                    'INSERT INTO appointment ("businessId", "customerId", service, datetime, status, "createdAt") VALUES ($1,$2,$3,$4,\'pending\',now())',
                     business_id,
                     customer_id,
                     params.get("service", "service"),
@@ -128,7 +128,7 @@ async def chat_message(business_id: str, payload: ChatReq):
                 )
 
     await execute(
-        "INSERT INTO \"AIAction\" (businessId, conversationId, agentType, action, result, createdAt) VALUES ($1,$2,$3,$4,$5,now())",
+        'INSERT INTO aiaction ("businessId", "conversationId", "agentType", action, result, "createdAt") VALUES ($1,$2,$3,$4,$5,now())',
         business_id,
         conversation_id,
         agent_result.get("agentType"),
@@ -146,19 +146,19 @@ async def get_business_stats(business_id: str):
         raise HTTPException(status_code=404, detail="business not found")
 
     total_conversations = await fetchrow(
-        "SELECT COUNT(*) as count FROM conversation WHERE businessId = $1",
+        'SELECT COUNT(*) as count FROM conversation WHERE "businessId" = $1',
         business_id
     )
     active_leads = await fetchrow(
-        "SELECT COUNT(*) as count FROM lead WHERE businessId = $1 AND status = 'qualified'",
+        'SELECT COUNT(*) as count FROM lead WHERE "businessId" = $1 AND status = \'qualified\'',
         business_id
     )
     qualified_leads = await fetchrow(
-        "SELECT COUNT(*) as count FROM lead WHERE businessId = $1 AND status = 'qualified'",
+        'SELECT COUNT(*) as count FROM lead WHERE "businessId" = $1 AND status = \'qualified\'',
         business_id
     )
     total_appointments = await fetchrow(
-        "SELECT COUNT(*) as count FROM appointment WHERE businessId = $1",
+        'SELECT COUNT(*) as count FROM appointment WHERE "businessId" = $1',
         business_id
     )
 
@@ -177,7 +177,7 @@ async def get_conversations(business_id: str):
         raise HTTPException(status_code=404, detail="business not found")
 
     conversations = await fetch(
-        "SELECT c.id, c.customerId, c.status, c.createdAt, cust.name as customerName FROM conversation c LEFT JOIN customer cust ON c.customerId = cust.id WHERE c.businessId = $1 ORDER BY c.createdAt DESC LIMIT 100",
+        'SELECT c.id, c."customerId", c.status, c."createdAt", cust.name as "customerName" FROM conversation c LEFT JOIN customer cust ON c."customerId" = cust.id WHERE c."businessId" = $1 ORDER BY c."createdAt" DESC LIMIT 100',
         business_id
     )
 
@@ -191,7 +191,7 @@ async def get_conversation_details(conversation_id: str):
         raise HTTPException(status_code=404, detail="conversation not found")
 
     messages = await fetch(
-        "SELECT * FROM message WHERE conversationId = $1 ORDER BY createdAt ASC",
+        'SELECT * FROM message WHERE "conversationId" = $1 ORDER BY "createdAt" ASC',
         conversation_id
     )
 
@@ -209,13 +209,13 @@ async def get_leads(business_id: str, status: str = None):
 
     if status:
         leads = await fetch(
-            "SELECT l.*, c.name as customerName FROM lead l LEFT JOIN customer c ON l.customerId = c.id WHERE l.businessId = $1 AND l.status = $2 ORDER BY l.score DESC LIMIT 100",
+            'SELECT l.*, c.name as "customerName" FROM lead l LEFT JOIN customer c ON l."customerId" = c.id WHERE l."businessId" = $1 AND l.status = $2 ORDER BY l.score DESC LIMIT 100',
             business_id,
             status
         )
     else:
         leads = await fetch(
-            "SELECT l.*, c.name as customerName FROM lead l LEFT JOIN customer c ON l.customerId = c.id WHERE l.businessId = $1 ORDER BY l.score DESC LIMIT 100",
+            'SELECT l.*, c.name as "customerName" FROM lead l LEFT JOIN customer c ON l."customerId" = c.id WHERE l."businessId" = $1 ORDER BY l.score DESC LIMIT 100',
             business_id
         )
 
@@ -243,7 +243,7 @@ async def update_lead(lead_id: str, updates: dict):
     if not update_fields:
         return dict(lead)
 
-    set_clause = ", ".join([f"{k} = ${i+1}" for i, k in enumerate(update_fields.keys())])
+    set_clause = ", ".join([f'"{k}" = ${i+1}' for i, k in enumerate(update_fields.keys())])
     values = list(update_fields.values()) + [lead_id]
 
     await execute(
