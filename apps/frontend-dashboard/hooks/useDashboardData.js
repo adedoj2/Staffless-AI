@@ -34,6 +34,9 @@ export const useConversations = (businessId, filters = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Serialize filters so a new {} literal on every render doesn't retrigger the effect.
+  const filtersKey = JSON.stringify(filters);
+
   useEffect(() => {
     if (!businessId) return;
 
@@ -41,7 +44,7 @@ export const useConversations = (businessId, filters = {}) => {
       setLoading(true);
       setError(null);
       try {
-        const data = await dashboardApiClient.getConversations(businessId, filters);
+        const data = await dashboardApiClient.getConversations(businessId, JSON.parse(filtersKey));
         setConversations(data.conversations || []);
       } catch (err) {
         setError(err.message);
@@ -51,7 +54,7 @@ export const useConversations = (businessId, filters = {}) => {
     };
 
     fetchConversations();
-  }, [businessId, filters]);
+  }, [businessId, filtersKey]);
 
   return { conversations, loading, error };
 };
@@ -64,6 +67,9 @@ export const useLeads = (businessId, filters = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Serialize filters so a new {} literal on every render doesn't retrigger the effect.
+  const filtersKey = JSON.stringify(filters);
+
   useEffect(() => {
     if (!businessId) return;
 
@@ -71,7 +77,7 @@ export const useLeads = (businessId, filters = {}) => {
       setLoading(true);
       setError(null);
       try {
-        const data = await dashboardApiClient.getLeads(businessId, filters);
+        const data = await dashboardApiClient.getLeads(businessId, JSON.parse(filtersKey));
         setLeads(data.leads || []);
       } catch (err) {
         setError(err.message);
@@ -81,7 +87,7 @@ export const useLeads = (businessId, filters = {}) => {
     };
 
     fetchLeads();
-  }, [businessId, filters]);
+  }, [businessId, filtersKey]);
 
   return { leads, loading, error };
 };

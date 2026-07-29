@@ -3,6 +3,12 @@ node_modules/
 .pnp
 .pnp.js
 
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
 # Environment files - NEVER commit these
 .env
 .env.local

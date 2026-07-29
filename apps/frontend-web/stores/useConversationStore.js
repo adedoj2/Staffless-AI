@@ -1,4 +1,4 @@
-import create from 'zustand'
+import { create } from 'zustand'
 
 const useConversationStore = create((set) => ({
   conversationId: null,
