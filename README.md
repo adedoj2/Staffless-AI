@@ -230,7 +230,7 @@ When contributing:
 
 ## License
 
-Choose the license that best fits your project (MIT is recommended for open-source projects).
+MIT
 
 ---
 
